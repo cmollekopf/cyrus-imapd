@@ -113,6 +113,9 @@ are listed with ``<none>''.
    hierarchy will be at the toplevel of the shared namespace.  A
    user's personal addressbook hierarchy will be a child of their Inbox. */
 
+{ "addressbook_default_displayname", "personal", STRING, "3.4.5" }
+/* The displayname to be used when creating a user's 'Default' addressbook. */
+
 { "admins", "", STRING, "2.3.17" }
 /* The list of userids with administrative rights.  Separate each userid
    with a space.  Sites using Kerberos authentication may use
