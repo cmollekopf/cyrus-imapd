@@ -484,6 +484,28 @@ static unsigned long principal_allow_cb(struct request_target_t *tgt)
     return tgt->namespace->allow;
 }
 
+static struct backend *proxy_findinboxserver(const char *userid)
+{
+    mbentry_t *mbentry = NULL;
+    struct backend *s = NULL;
+
+    char *inbox = mboxname_user_mbox(userid, NULL);
+    int r = mboxlist_lookup(inbox, &mbentry, NULL);
+    free(inbox);
+
+    if (r) return NULL;
+
+    if (mbentry->mbtype & MBTYPE_REMOTE) {
+        s = proxy_findserver(mbentry->server, &http_protocol,
+                             httpd_userid, &backend_cached,
+                             NULL, NULL, httpd_in);
+    }
+
+    mboxlist_entry_free(&mbentry);
+
+    return s;
+}
+
 
 /* Parse request-target path in DAV principals namespace */
 static int principal_parse_path(const char *path, struct request_target_t *tgt,
@@ -6116,7 +6138,18 @@ EXPORTED int meth_propfind(struct transaction_t *txn, void *params)
     /* Parse the path */
     if (fparams->parse_path) {
         r = dav_parse_req_target(txn, fparams);
-        if (r) return r;
+        if (r) {
+
+            struct backend *be;
+            be = proxy_findinboxserver(txn->req_tgt.userid);
+            if (!be) {
+                syslog(LOG_ERR, "Could not find a backend");
+                return HTTP_UNAVAILABLE;
+            }
+            return http_pipe_req_resp(be, txn);
+
+            return r;
+        }
     }
 
     /* Make sure method is allowed */
