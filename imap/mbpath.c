@@ -118,6 +118,7 @@ struct options_t {
 #define MODE_USER   1
 #define MODE_PATH   2
 
+#ifdef USE_XAPIAN
 static void find_tier(const char *key, const char *val __attribute__((unused)), void *rock)
 {
     strarray_t *tiers = (strarray_t *)rock;
@@ -125,6 +126,7 @@ static void find_tier(const char *key, const char *val __attribute__((unused)), 
     if (!partition) return;
     strarray_appendm(tiers, xstrndup(key, partition - key));
 }
+#endif
 
 static void print_json(const mbname_t *mbname, const mbentry_t *mbentry)
 {
