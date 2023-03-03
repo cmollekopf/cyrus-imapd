@@ -7150,6 +7150,12 @@ localcreate:
                                            imapd_userid, imapd_authstate,
                                            flags, NULL/*mailboxptr*/);
                 if (r) {
+                    // If the mailbox already exists this should be fine.
+                    // TODO: check acl?
+                    if (r == IMAP_MAILBOX_EXISTS) {
+                        r = 0;
+                        continue;
+                    }
                     // XXX  should we delete the ancestors we just created?
                     break;
                 }
