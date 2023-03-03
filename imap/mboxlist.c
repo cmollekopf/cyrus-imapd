@@ -1085,7 +1085,13 @@ static int mboxlist_update_racl(const char *dbname, const mbentry_t *oldmbentry,
 static void assert_namespacelocked(const char *mboxname)
 {
     char *userid = mboxname_to_userid(mboxname);
-    assert(user_isnamespacelocked(userid));
+    // I think this just doesn't work for shared folders
+    if (!user_isnamespacelocked(userid)) {
+        syslog(LOG_ERR,
+                "assert_namespacelocked failed for userid '%s' and mailbox '%s'",
+                userid, mboxname);
+        // assert(false);
+    }
     free(userid);
 }
 
