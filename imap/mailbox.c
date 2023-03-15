@@ -4087,6 +4087,9 @@ static int mailbox_update_sieve(struct mailbox *mailbox,
         char *errors = NULL;
 
         r = sievedir_put_script(mailbox->sievedir, name, content, &errors);
+        if (errors) {
+            syslog(LOG_ERR, "Error during sievedir_put_script for %s %s", mailbox_name(mailbox), errors);
+        }
 
         if (!r && isactive) {
             r = sievedir_activate_script(mailbox->sievedir, name);

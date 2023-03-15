@@ -1052,6 +1052,9 @@ EXPORTED int sieve_script_rebuild(const char *userid,
     /* Update bytecode */
     char *errors = NULL;
     r = sievedir_put_script(sievedir, script, content, &errors);
+    if (errors) {
+        syslog(LOG_ERR, "Error during sievedir_put_script for %s %s", userid, errors);
+    }
     free(errors);
 
   done:
