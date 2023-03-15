@@ -933,7 +933,13 @@ int sync_sieve_activate(const char *userid, const char *bcname)
                  (int) strlen(bcname) - BYTECODE_SUFFIX_LEN, bcname);
 
         r = sievedb_lookup_name(db, name, &sdata, 0);
-        if (r) goto done;
+        if (r) {
+            if (config_getswitch(IMAPOPT_SYNC_IGNORE_SIEVE_ERRORS)) {
+                syslog(LOG_ERR, "Failed to find the sieve script to activate: %s. Ignoring", bcname);
+                r = 0;
+            }
+            goto done;
+        }
     }
 
     r = sieve_script_activate(mailbox, sdata);
@@ -3447,6 +3453,12 @@ int sync_sieve_upload(const char *userid, const char *fname,
     }
 
     r = sieve_script_store(mailbox, sdata, &buf);
+    if (r) {
+        if (config_getswitch(IMAPOPT_SYNC_IGNORE_SIEVE_ERRORS)) {
+            syslog(LOG_ERR, "Failed to store the sieve script %s for %s. Ignoring", name, userid);
+            r = 0;
+        }
+    }
 
   done:
     if (!r) sync_log_sieve(userid);

@@ -2827,6 +2827,11 @@ product version in the capabilities
    sync_client will only use csync.  Prefix with a channel name to
    apply only for that channel */
 
+{ "sync_ignore_sieve_errors", 0, SWITCH, "3.6.0" }
+/* Whether sync_client should ignore errors related to sieve
+   script creation, and activation. Useful to fix replication
+   with legacy backends*/
+
 { "syslog_prefix", NULL, STRING, "3.1.8" }
 /* String to be prepended to the process name in syslog entries. Can
    be further overridden by setting the $CYRUS_SYSLOG_PREFIX environment
