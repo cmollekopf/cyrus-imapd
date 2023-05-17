@@ -1420,8 +1420,11 @@ int decode_annotations(/*const*/struct dlist *annots,
             return IMAP_PROTOCOL_BAD_PARAMETERS;
         if (!dlist_getatom(aa, "USERID", &userid))
             return IMAP_PROTOCOL_BAD_PARAMETERS;
-        if (!dlist_getnum64(aa, "MODSEQ", &modseq))
-            return IMAP_PROTOCOL_BAD_PARAMETERS;
+        if (!dlist_getnum64(aa, "MODSEQ", &modseq)) {
+            // Backwards compat for cyrus 2.5
+            modseq = 0;
+            //return IMAP_PROTOCOL_BAD_PARAMETERS;
+        }
         if (!dlist_getbuf(aa, "VALUE", &value))
             return IMAP_PROTOCOL_BAD_PARAMETERS;
         if (!strcmp(entry, IMAP_ANNOT_NS "thrid") &&
@@ -2997,9 +3000,9 @@ int sync_apply_mailbox(struct dlist *kin,
     /* take all mailbox (not message) annotations - aka metadata,
      * they're not versioned either */
     if (ka)
-        decode_annotations(ka, &mannots, mailbox, NULL);
+        r = decode_annotations(ka, &mannots, mailbox, NULL);
 
-    r = read_annotations(mailbox, NULL, &rannots, 0, 0);
+    if (!r) r = read_annotations(mailbox, NULL, &rannots, 0, 0);
     if (!r) r = apply_annotations(mailbox, NULL, rannots, mannots, 0, NULL);
 
     if (r) {
