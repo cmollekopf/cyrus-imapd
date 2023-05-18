@@ -1409,7 +1409,7 @@ int annotate_fetch_proxy(const char *server, const char *mbox_pat,
                          const strarray_t *attribute_pat)
 {
     struct backend *be;
-    int i, j;
+    int i;
     char mytag[128];
 
     assert(server && mbox_pat && entry_pat && attribute_pat);
@@ -1422,24 +1422,28 @@ int annotate_fetch_proxy(const char *server, const char *mbox_pat,
     /* Send command to remote */
     proxy_gentag(mytag, sizeof(mytag));
     prot_printf(be->out, "%s GETMETADATA \"%s\" (", mytag, mbox_pat);
+
+    if (entry_pat->count != attribute_pat->count) {
+        syslog(LOG_ERR, "Number of scopes and entries must match");
+        return IMAP_INTERNAL;
+    }
+
     for (i = 0; i < entry_pat->count; i++) {
         const char *entry = strarray_nth(entry_pat, i);
-
-        for (j = 0; j < attribute_pat->count; j++) {
-            const char *scope, *attr = strarray_nth(attribute_pat, j);
-            if (!strcmp(attr, "value.shared")) {
-                scope = "/shared";
-            }
-            else if (!strcmp(attr, "value.priv")) {
-                scope = "/private";
-            }
-            else {
-                syslog(LOG_ERR, "won't get deprecated annotation attribute %s", attr);
-                continue;
-            }
-            prot_printf(be->out, "%s%s%s", i ? " " : "", scope, entry);
+        const char *scope, *attr = strarray_nth(attribute_pat, i);
+        if (!strcmp(attr, "value.shared")) {
+            scope = "/shared";
         }
+        else if (!strcmp(attr, "value.priv")) {
+            scope = "/private";
+        }
+        else {
+            syslog(LOG_ERR, "won't get deprecated annotation attribute %s", attr);
+            continue;
+        }
+        prot_printf(be->out, "%s%s%s", i ? " " : "", scope, entry);
     }
+
     prot_printf(be->out, ")\r\n");
     prot_flush(be->out);
 
