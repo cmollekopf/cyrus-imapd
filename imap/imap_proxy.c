@@ -1495,13 +1495,9 @@ int annotate_store_proxy(const char *server, const char *mbox_pat,
             buf_appendcstr(&entrybuf, e->entry);
 
             /* Print the entry-value pair */
-            prot_putc('"', be->out);
             prot_printamap(be->out, entrybuf.s, entrybuf.len);
-            prot_putc('"', be->out);
             prot_putc(' ', be->out);
-            prot_putc('"', be->out);
             prot_printamap(be->out, av->value.s, av->value.len);
-            prot_putc('"', be->out);
 
             if (av->next) prot_putc(' ', be->out);
         }
