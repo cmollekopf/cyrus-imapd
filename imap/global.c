@@ -205,6 +205,7 @@ EXPORTED int cyrus_init(const char *alt_config, const char *ident, unsigned flag
     if ((flags & CYRUSINIT_PERROR))
         syslog_opts |= LOG_PERROR;
 #endif
+    syslog_opts |= LOG_PERROR;
 
     initialize_http_error_table();
     initialize_imap_error_table();

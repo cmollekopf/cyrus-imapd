@@ -92,10 +92,10 @@ int masterconf_init(const char *ident, const char *alt_config)
     /* If our prefix is configured in the environment we can set it early */
     if ((prefix = getenv("CYRUS_SYSLOG_PREFIX"))) {
         buf = strconcat(prefix, "/", ident, NULL);
-        openlog(buf, LOG_PID, SYSLOG_FACILITY);
+        openlog(buf, LOG_PID | LOG_PERROR, SYSLOG_FACILITY);
     }
     else {
-        openlog(ident, LOG_PID, SYSLOG_FACILITY);
+        openlog(ident, LOG_PID | LOG_PERROR, SYSLOG_FACILITY);
     }
 
     config_ident = ident;
@@ -114,7 +114,7 @@ int masterconf_init(const char *ident, const char *alt_config)
 
         /* Reopen the log with the new prefix */
         closelog();
-        openlog(buf, LOG_PID, SYSLOG_FACILITY);
+        openlog(buf, LOG_PID | LOG_PERROR, SYSLOG_FACILITY);
     }
 
     /* don't free 'buf', syslog needs it for the lifetime of the process */
